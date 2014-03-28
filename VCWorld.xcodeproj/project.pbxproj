@@ -6,10 +6,19 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXFileReference section */
+		B61CE12B18E5302500FBFE32 /* SearchBase.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = SearchBase.java; sourceTree = "<group>"; };
+		B61CE12C18E5302500FBFE32 /* State.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = State.java; sourceTree = "<group>"; };
+		B61CE12D18E5302500FBFE32 /* testworld.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testworld.txt; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		B61CE12218E528B400FBFE32 = {
 			isa = PBXGroup;
 			children = (
+				B61CE12B18E5302500FBFE32 /* SearchBase.java */,
+				B61CE12C18E5302500FBFE32 /* State.java */,
+				B61CE12D18E5302500FBFE32 /* testworld.txt */,
 			);
 			sourceTree = "<group>";
 		};
@@ -21,7 +30,7 @@
 			attributes = {
 				LastUpgradeCheck = 0510;
 			};
-			buildConfigurationList = B61CE12618E528B400FBFE32 /* Build configuration list for PBXProject "VCWorld.java" */;
+			buildConfigurationList = B61CE12618E528B400FBFE32 /* Build configuration list for PBXProject "VCWorld" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -49,14 +58,21 @@
 			};
 			name = Release;
 		};
+		B61CE12A18E5297C00FBFE32 /* VacuumBuild */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = VacuumBuild;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B61CE12618E528B400FBFE32 /* Build configuration list for PBXProject "VCWorld.java" */ = {
+		B61CE12618E528B400FBFE32 /* Build configuration list for PBXProject "VCWorld" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B61CE12718E528B400FBFE32 /* Debug */,
 				B61CE12818E528B400FBFE32 /* Release */,
+				B61CE12A18E5297C00FBFE32 /* VacuumBuild */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
