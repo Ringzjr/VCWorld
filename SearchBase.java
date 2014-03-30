@@ -68,7 +68,6 @@ public class SearchBase {
     public void go(VCRoom room, State start)
     {
         State solution = RBFS(room, start, start.getFvalue());
-        if(debug)System.out.println(solution.getMost() + "  " +solution);
         
         
     }
@@ -79,18 +78,17 @@ public class SearchBase {
     public State RBFS(VCRoom room, State current, double flimit)
     { double f_limit = flimit;
             if(debug)System.out.println("(DEBUG on)\nThe state calling RBFS is: "+ current+"\n");
+            if(current.getDirt().size()==0){System.out.println("RESULT FOUND!!!!!!!!!!"); System.out.println(current); return current;}
         Vector<State> kids = room.getKids(current);
-        if (kids.size() < 0){current.setMost(-1);if(debug)System.out.println("(DEBUG on)\nNo possible moves.\n"); return current;}
+        if (kids.size() <= 0){current.setMost(-1);if(debug)System.out.println("(DEBUG on)\nNo possible moves.\n"); return current;}
         while(true){
-            int[] place_holder = {0,0};
-            State most = new State(place_holder, 0.0);
+            State most = new State();
             State best = findBest(kids); State second = secondBest(kids);
                 if(debug)System.out.println("(DEBUG on)\nBest path here is:\n" + best);
                 if(debug)System.out.println("and it's MOST is: " +best.getMost()+ "; it's fValue is: "+best.getFvalue()+"\n");
-            if(best.getDirt().size()==0){System.out.println("RESULT FOUND!!!!!!!!!!"); System.out.println(best); return best;}
-            if(current.getPath().length() == 0) f_limit = second.getMost();
+            if(current.getPath().length() == 0)if(second.getMost() >0)f_limit = second.getMost();else f_limit = best.getMost();
                 if(debug)System.out.println("current F_LIMIT is: "+ f_limit+"\n");
-            if(best.getMost() > f_limit){current.setMost(best.getMost()); return best;}
+            if((best.getMost() > f_limit)||(best.getMost()<0)){current.setMost(best.getMost()); return best;}
             else most = RBFS(room, best, f_limit);
             if (most.getDirt().size()==0)return most;
                 if(debug)System.out.println("(DEBUG on)\nReturning... Setting 'most seen' for: " + best.getPath() +" to " +best.getMost()+"\n");

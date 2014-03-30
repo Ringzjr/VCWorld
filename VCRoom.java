@@ -29,7 +29,10 @@ public class VCRoom{
     
     
     public State initialize()
-    {   State fresh = new State(start, hvalue(start, dirtspots));
+    {
+        Vector<int[]> dirty = new Vector<int[]>();
+        for(int[] x: dirtspots)dirty.add(x);
+        State fresh = new State(start, hvalue(start, dirty));
         fresh.setDirt(dirtspots);
         //fresh.setFvalue(hvalue(fresh));
         //fresh.setMost(fresh.getFvalue());
@@ -50,26 +53,31 @@ public class VCRoom{
         Vector<State> kids = new Vector<State>();
         Vector<int[]> locations = new Vector<int[]>(); 
         
-        checkMoves(current.getLocation(), locations);  // Did not add anything to location
-            if(debug)for(int[] x:locations)System.out.println("y: "+x[0]+"; x: "+x[1]);
-        if(debug)System.out.println("Total amount of moves possible: "+locations.size());
-        
-        if(debug){System.out.println("Possible moves from: ["+current.getLocation()[0]+"]["+current.getLocation()[1]+"]");
+        checkMoves(current.getLocation(), locations, current.getBacklist());  // Add's to location
+                        if(debug)for(int[] x:locations)System.out.println("y: "+x[0]+"; x: "+x[1]);
+                        if(debug)System.out.println("Total amount of moves possible: "+locations.size());
+                        if(debug){System.out.println("Possible moves from: ["+current.getLocation()[0]+"]["+current.getLocation()[1]+"]");
                         if(debug)for(int i = 0; i < locations.size(); i++){
                         System.out.println((i+1) + ": [" +locations.elementAt(i)[0] +"]["+ locations.elementAt(i)[1]+"]");}
-        }
+                                }
         
         //Each location is a kid. Each kid had it's own dirt remaining vector. Create a new vector, for each location.
         for(int i = 0; i < locations.size(); i++){
             
             Vector<int []> dirt_remaining = new Vector<int[]>();
+            Vector<int []> dirt_remaining_copy = new Vector<int[]>();
+            boolean backlist = false;
+            
             for(int[] x : current.getDirt())
-                if ((x[0] != locations.elementAt(i)[0]) || (x[1] != locations.elementAt(i)[1])) dirt_remaining.add(x);
+                if ((x[0] != locations.elementAt(i)[0]) || (x[1] != locations.elementAt(i)[1]))
+                {dirt_remaining.add(x); dirt_remaining_copy.add(x);}
+                else backlist = true;
             
             double gvalue = (double) current.getPath().length() + 1;
-            double f_value = gvalue + hvalue(locations.elementAt(i), dirt_remaining);
-            State kid = new State(locations.elementAt(i), current, f_value); // location and path set
-            if(debug)System.out.println("kid's location: ["+kid.getLocation()[0]+"]["+kid.getLocation()[1]+"]");
+            double f_value = gvalue + hvalue(locations.elementAt(i), dirt_remaining_copy);
+            State kid = new State(locations.elementAt(i), current, f_value, backlist); // location and path set
+                    if(debug)System.out.println("got to kid creation");
+                    if(debug)System.out.println("kid's location: ["+kid.getLocation()[0]+"]["+kid.getLocation()[1]+"]");
             
             kid.setDirt(dirt_remaining);                             // dirt_remaning set
             //kid.setFvalue(kid.getPath().length() + hvalue(kid));     // fvalue set
@@ -78,47 +86,37 @@ public class VCRoom{
         return kids;
     }
 
-    public double hvalue(State s)
-    {//s should have dirt_remaining, and path set.
-     // first find nearest dirt
-        int[] loc = s.getLocation();
-        int[] nearestDirt = {0,0};
-        if(s.getDirt().size()>0)nearestDirt = s.getDirt().elementAt(0); // what if there is no dirt?
-        else return (0.0);
-        double dist = 6000;
-        for (int[] x : s.getDirt())
-        { boolean bigger = false;
-            nearestDirt = x;
-          dist = distance(loc, x);    // <-- distance between nearest dirt and location = hvalue
-          for (int [] y : s.getDirt())
-          { double dist2 = distance(loc, y);
-              if (dist2 < dist) bigger = true;}
-            if (!bigger) break;
-        }
-        if(debug)System.out.println("Nearest dirt at: "+nearestDirt[0] + " " + nearestDirt[1]);
-        return dist;
-    }
     
     public double hvalue(int[] location, Vector<int []> dirt)
     {
-        int[] loc = location;
-        int[] nearestDirt = {0,0};
-        if(dirt.size()>0)nearestDirt = dirt.elementAt(0);
-        else return (0.0);
-        double dist = 6000;
+        double value = 0.0;
+        if(dirt.size() <= 0)
+            return value;                 // Base Case
+        
+        int[] nearestDirt = nearest(location, dirt);
+        dirt.remove(dirt.indexOf(nearestDirt));
+        value = distance(location, nearestDirt) + hvalue(nearestDirt, dirt);
+        
+        return value;
+    }
+    
+    
+    public int[] nearest(int[] location, Vector<int[]> dirt)
+    {   // Assuming dirt.size() > 0
+        int[] nearestDirt = dirt.elementAt(0);
+        
         for (int[] x : dirt)
         { boolean bigger = false;
             nearestDirt = x;
-            dist = distance(loc, x);    // <-- distance between nearest dirt and location = hvalue
+            double dist = distance(location, x);    // <-- distance between nearest dirt and location = hvalue
             for (int [] y : dirt)
-            { double dist2 = distance(loc, y);
+            { double dist2 = distance(location, y);
                 if (dist2 < dist) bigger = true;}
             if (!bigger) break;
         }
-        if(debug)System.out.println("Nearest dirt at: "+nearestDirt[0] + " " + nearestDirt[1]);
-        return dist;
+        return nearestDirt;
+
     }
-    
     
     public double distance(int[] here, int[] there)
         {
@@ -135,39 +133,81 @@ public class VCRoom{
 
 
 
-    public void checkMoves(int[] loc, Vector<int[]> moves)
-    {int y = loc[0];  int x = loc[1]; int[] child = new int[2]; int[] child2 = new int[2]; int[] child3 = new int[2]; int[] child4 = new int[2];
+    public void checkMoves(int[] loc, Vector<int[]> moves, Vector<int[]> backlist)
+    {int y = loc[0];  int x = loc[1]; int[] child = {(y-1),x}; int[] child2 = {(y+1),x}; int[] child3 = {y,(x-1)}; int[] child4 = {y, (x+1)};
         // Testing Up move
-        try{ if (!(map[--y][x]==('x'))&&!(map[y][x]==('X')))
-        {child[0] = y; child[1] = x; moves.add(child); if(debug)System.out.println("Can go North from: ["+loc[0]+"]["+loc[1]+"] to ["+y+"]["+x+"]");}
+        boolean beenUp = false;
+        for(int[] w: backlist)
+            if((w[0] == child[0]) && (w[1] == child[1]))beenUp = true;
+    
+        if(!beenUp){
+            
+        try{ if (!(map[(y-1)][x]==('x'))&&!(map[y-1][x]==('X')))
+        {moves.add(child); if(debug)System.out.println("Can go North from: ["+loc[0]+"]["+loc[1]+"] to ["+y+"]["+x+"]");}
         }
         catch (Exception offmapSouth){if(debug)System.out.println("Cannot go North from: ["+loc[0]+"]["+loc[1]+"]");}
-        y++;
+            
+        }
+    
+        
         if(debug)for (int i = 0; i < moves.size(); i++)
             System.out.println("current moves list: [" + moves.elementAt(i)[0]+"]["+moves.elementAt(i)[1]+"]");
+        
         // Down
-        try{ if (!(map[++y][x]==('x'))&&!(map[y][x]==('X')))
-        {child2[0] = y; child2[1] = x; moves.add(child2);
+        boolean beenDown = false;
+        for(int[] w: backlist)
+            if((w[0] == child2[0]) && (w[1] == child2[1]))beenDown = true;
+        
+        if(!beenDown){
+        
+        
+        try{ if (!(map[(y+1)][x]==('x'))&&!(map[y+1][x]==('X')))
+        {moves.add(child2);
             if(debug)System.out.println("Can go South from: ["+loc[0]+"]["+loc[1]+"] to ["+y+"]["+x+"]");}
         }
         catch (Exception offmapNorth){if(debug)System.out.println("Cannot go South from: ["+loc[0]+"]["+loc[1]+"]");}
-        // Left
-        y--;
+            
+        }
+        
+        
         if(debug)for (int i = 0; i < moves.size(); i++)
             System.out.println("current moves list: [" + moves.elementAt(i)[0]+"]["+moves.elementAt(i)[1]+"]");
-        try{ if (!(map[y][--x]==('x'))&&!(map[y][x]==('X')))
-        {child3[0] = y; child3[1] = x;moves.add(child3);if(debug)System.out.println("Can go West from: ["+loc[0]+"]["+loc[1]+"] to ["+y+"]["+x+"]");}
+        
+        // Left
+        boolean beenLeft = false;
+        for(int[] w: backlist)
+            if((w[0] == child3[0]) && (w[1] == child3[1]))beenLeft = true;
+        
+        if(!beenLeft){
+        
+        
+        
+        
+        try{ if (!(map[y][(x-1)]==('x'))&&!(map[y][x-1]==('X')))
+        {moves.add(child3);if(debug)System.out.println("Can go West from: ["+loc[0]+"]["+loc[1]+"] to ["+y+"]["+x+"]");}
         }
         catch (Exception offmapEast){if(debug)System.out.println("here is a: "+map[y][x]);System.out.println("Cannot go West from: ["+loc[0]+"]["+loc[1]+"]  ---- "+ offmapEast.getMessage() );}
-        x++;
+        
+        }
+        
         if(debug)for (int i = 0; i < moves.size(); i++)
             System.out.println("current moves list: [" + moves.elementAt(i)[0]+"]["+moves.elementAt(i)[1]+"]");
+        
         // Right
-        try{ if (!(map[y][++x]==('x'))&&!(map[y][x]==('X')))
-        {child4[0] = y; child4[1] = x; moves.add(child4);if(debug)System.out.println("Can go East from: ["+loc[0]+"]["+loc[1]+"] to ["+y+"]["+x+"]");}
+        boolean beenRight = false;
+        for(int[] w: backlist)
+            if((w[0] == child4[0]) && (w[1] == child4[1]))beenRight = true;
+        
+        
+        if(!beenRight){
+        
+        try{ if (!(map[y][(x+1)]==('x'))&&!(map[y][x+1]==('X')))
+        {moves.add(child4);if(debug)System.out.println("Can go East from: ["+loc[0]+"]["+loc[1]+"] to ["+y+"]["+x+"]");}
         }
         catch (Exception offmapWest){/*if(debug)*/System.out.println("Cannot go East from: ["+loc[0]+"]["+loc[1]+"]");}
-        x--;
+            
+        }
+        
         if(debug)for (int i = 0; i < moves.size(); i++)
         System.out.println("current moves list: [" + moves.elementAt(i)[0]+"]["+moves.elementAt(i)[1]+"]");
     

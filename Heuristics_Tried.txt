@@ -1,0 +1,11 @@
+1. Manhattan Distance: 
+    Sheer distance from a state's position to the nearest dirt.
+
+2. Manhattan Distance (accumulative):
+    Distance from a state's position to the nearest dirt,
+    + the distance from that nearest dirt, to the next nearest dirt
+    + etc, until no more dirt. 
+    
+3. Snake Distance:
+    Length of shortest non-disconnected path to nearest dirt. 
+    Like Manhattan distance but considering walls. 

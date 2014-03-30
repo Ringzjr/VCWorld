@@ -12,6 +12,7 @@
 		B61CE12D18E5302500FBFE32 /* testworld.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testworld.txt; sourceTree = "<group>"; };
 		B61CE12E18E53AB200FBFE32 /* VCRoom.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = VCRoom.java; sourceTree = "<group>"; };
 		B61CE12F18E8907100FBFE32 /* twodirt.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = twodirt.txt; sourceTree = "<group>"; };
+		B61CE13018E8B1FB00FBFE32 /* Heuristics_Tried.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Heuristics_Tried.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -19,6 +20,7 @@
 			isa = PBXGroup;
 			children = (
 				B61CE12E18E53AB200FBFE32 /* VCRoom.java */,
+				B61CE13018E8B1FB00FBFE32 /* Heuristics_Tried.txt */,
 				B61CE12B18E5302500FBFE32 /* SearchBase.java */,
 				B61CE12F18E8907100FBFE32 /* twodirt.txt */,
 				B61CE12C18E5302500FBFE32 /* State.java */,
