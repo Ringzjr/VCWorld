@@ -1,132 +1,96 @@
 import java.util.Vector;
 
 
-public class State implements Comparable<State> {
+public class State {
 
-	private String rep;
-	private Vector<String> path;
-	private int depth;
-	private int gvalue = 0;
-	private int fvalue = 0;
+    private int[] location;
+	private String path = "";
+	private double fvalue;
+    private double most;       // Highest fvalue seen by branch.
+    private Vector<int[]> dirt_remaining = new Vector<int[]>();
+    boolean debug = false;
 
-	public State(String r) {
-		rep = r;
-		path = new Vector<String>();
-		path.add(r);
-		depth = 0;
+	public State(int[] loc, double f_value) {
+		location = loc;
+        fvalue = f_value;
+        most = f_value;
+	}
+	public State(int[] loc, State parent, double f_value) {
+        fvalue = f_value;
+        most = parent.getMost();
+		location = loc;
+        if(debug)System.out.println("New kid location: ["+location[0]+"]["+location[1]+"]");
+        int y = parent.getLocation()[0];
+        int x = parent.getLocation()[1];
+        char move = '0';
+        move = (location[0] < y)? 'N': move;
+        if(debug){System.out.println("but parent y: "+y+" and parent x: "+x);
+            System.out.println(move);}
+        move = (location[0] > y)? 'S': move;
+        if(debug)System.out.println(move);
+        move = (location[1] < x)? 'W': move;
+        if(debug)System.out.println(move);
+        move = (location[1] > x)? 'E': move;
+        if(debug)System.out.println(move);
+        path = parent.getPath() + move;
+        if(debug)System.out.println("Therefore move is: "+move);
+	}
+    
+    public State()
+    {
+        int[] place_holder = {0,0};
+        fvalue = -1.0;
+        most = -1.0;
+        location = place_holder;}
+    
+    // Gettr Methods
+    
+    public String getPath()
+        {return path; }
 	
-
-	}
-	public State(State s, String n) {
-		rep = n;
-		path = new Vector<String>(s.path);
-		path.add(n);
-		depth = s.depth+1;
-	}
-	public State(String r, String goal) {
-		rep = r;
-		path = new Vector<String>();
-		path.add(r);
-		depth = 0;
-		gvalue = heuristic(r,goal);
-		fvalue = gvalue + depth;
-	}
-	public State(State s, String n, String goal) {
-		rep = n;
-		path = new Vector<String>(s.path);
-		path.add(n);
-		depth = s.depth+1;
-		gvalue = heuristic(n,goal);
-		fvalue = gvalue + depth;
-	}
-	
-	public int printPath() {
-		int count = 1;
-		for (String step : path)
-		{
-			System.out.println(count+"\n"+convert(step));
-			count++;
-		}
-		return 0;
-	}
-	public int heuristic(String r, String goal){
-	
-	char[] n = r.toCharArray();
-	char[] g = goal.toCharArray();
-	char[] me = new char[r.length() - 2];
-	char[] goal2 = new char[goal.length() - 2];
-	int size = 0;	int gv = 0;
-	int count1 = -1; int count2 = -1;
-	
-	for (int i=0; i < goal.length(); i++){if (n[i]!='/'){++count1; me[count1] = n[i];}
-	if (g[i]!='/'){++count2; goal2[count2] = g[i];}
-	  } 
-	
-	for (char l: g){if (l == '/')break; size++; }
-	for (char a: me){
-	int bad = new String(me).indexOf(a);    int good = new String(goal2).indexOf(a);
-	   int dist = bad - good;
-	int hold = bad; 
-
-	while(dist != 0){
-		if (dist < 0){
-			if(size+hold < me.length && size+dist <= 0){dist += size; hold+=size; gv+=1;}
-			else{dist+=1; hold+=1; gv+=1;}
-				}
-		else if(hold-size >= 0 && dist-size >= 0){dist -= size; hold-=size; gv+=1;}
-			else{dist-=1; hold-=1; gv+=1;}
-		}
-	}
-	return gv;
-		} 
+	public int getDepth()
+        {return path.length(); }
+    
+    public double getMost()
+        {if(most > fvalue)return most;
+            else return fvalue;}
+    
+	public double getFvalue()
+        {return fvalue; }
+    
+    public Vector<int[]> getDirt()
+        {return dirt_remaining; }
+    
+    public int[] getLocation()
+    {return location;}
+    
+    // Settr Methods
+    
+    public void setFvalue(double value)
+        {fvalue = value;}
+    
+    public void setDirt(Vector<int[]> Dirt)
+        {dirt_remaining = Dirt; }
+    
+	public void setPath(String p)
+        {this.path = p; }
+    
+    public void setMost(double value)
+        {most = value;}
+    
+    
+    // Other Methods
+    
+    public String toString()
+        {return ("Path: " + path + ";\nLocation: [" + location[0]+"]["+location[1]
+                  + "];\nfvalue: " + fvalue + "\n"); }
+    
+    public boolean biggerThan (State other)
+    { double me; double you; double yourMost = other.getMost(); double yourFvalue = other.getFvalue();
+        me = ((fvalue >= most) && (most > -1))? fvalue : most;
+        you = ((yourFvalue >= yourMost) && (yourMost > -1))? yourFvalue: yourMost;
+            if(((me > you)&&(you > 0)) || (me < 0)) return true; else return false; }
+    
 	
 	
-	
-
-	public int compareTo(State other) {
-
-		if (!(other instanceof State)) {
-			System.exit(3);
-			return 0;
-		}
-		/*
-		int thisF = this.depth + this.heuristic()
-		int otherF = ((State)other).getDepth() + ((State)other).heuristic()
-		return thisF - otherF
-		*/
-		// deeper is larger
-		//else return ((State)other).getDepth() -depth;
-		//deeper is smaller  
-		else return depth - ((State)other).getDepth();
-
-	}
-
-	private String convert(String step) {
-		String[] pieces = step.split("/");
-		String answer = "";
-		for (String p : pieces)
-			answer = answer +p +"\n";
-		return answer;
-	}
-
-	public int getDepth() {
-		return depth;
-	}
-	public int getFvalue(){
-	return fvalue;}
-	public void setDepth(int depth) {
-		this.depth = depth;
-	}
-	public Vector<String> getPath() {
-		return path;
-	}
-	public void setPath(Vector<String> path) {
-		this.path = path;
-	}
-	public String getRep() {
-		return rep;
-	}
-	public void setRep(String rep) {
-		this.rep = rep;
-	}
 }

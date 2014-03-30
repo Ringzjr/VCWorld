@@ -10,13 +10,17 @@
 		B61CE12B18E5302500FBFE32 /* SearchBase.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = SearchBase.java; sourceTree = "<group>"; };
 		B61CE12C18E5302500FBFE32 /* State.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = State.java; sourceTree = "<group>"; };
 		B61CE12D18E5302500FBFE32 /* testworld.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = testworld.txt; sourceTree = "<group>"; };
+		B61CE12E18E53AB200FBFE32 /* VCRoom.java */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.java; path = VCRoom.java; sourceTree = "<group>"; };
+		B61CE12F18E8907100FBFE32 /* twodirt.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = twodirt.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		B61CE12218E528B400FBFE32 = {
 			isa = PBXGroup;
 			children = (
+				B61CE12E18E53AB200FBFE32 /* VCRoom.java */,
 				B61CE12B18E5302500FBFE32 /* SearchBase.java */,
+				B61CE12F18E8907100FBFE32 /* twodirt.txt */,
 				B61CE12C18E5302500FBFE32 /* State.java */,
 				B61CE12D18E5302500FBFE32 /* testworld.txt */,
 			);

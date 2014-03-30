@@ -1,5 +1,5 @@
-import java.util.Scanner;
 import java.util.Vector;
+import java.io.*;
 
 public class SearchBase {
 
@@ -7,185 +7,134 @@ public class SearchBase {
 	public static boolean debug = false;
 
 
-	public static void main(String[] args)  {
+	public static void main(String[] args) throws IOException {
 			
-		
-		
-		
-	}
-
-	private void process(int depth_limit, String choice, boolean hasLimit) {
-
-		//String start = "216/4x8/753";
-		//String goal = "123/8x4/765";
-		String start = "2D34/18E5/xC96/BAF7";
-		String goal = "1234/CDE5/BxF6/A987";
-		int size = 4;
-
-
-		if (choice.equals("bfs")){
-		CarryBoolean p = new CarryBoolean();
-		int THIS_DEPTH = search(p , depth_limit, new EightPuzzle(start, goal,size), new PQasList(), hasLimit);
-		// best first search uses PQ as search list, it is breadth-first search.
-		// PQ.poll is expanding the nodes that entered first. (BFS)
-		// Remove depth limiter. And make it return first path it finds.  
-		
-		// The vector search is our DFS. It will keep it's depth limiter.
-		
-		// DFID will be a DFS trapped in a while loop, incrementing
-		// it's depth limiter from 0 until it reaches the depth limit specified. 
-		
-		// A's heuristic: Can be how many chars are in the correct spot for now
-		// IDA will need to remember the smallest F value each iteration.
-		// and use that as a limit
-		// f(n) = depth + 2(correct chars);
-		 
-		System.out.println("The goal was found: "+p.getValue());
-		System.out.println("Last depth was "+THIS_DEPTH);
-		
-		}
-		
-		if (choice.equals("dfs")){
-		while(true){
-		CarryBoolean p = new CarryBoolean();
-		int NEXT_DEPTH = search(p , depth_limit, new EightPuzzle(start, goal,size), new VectorAsList(), hasLimit);
-		System.out.println("The goal was found: "+p.getValue());
-		System.out.println("Suggested next depth is "+NEXT_DEPTH+"\n");
-
-		System.out.println("Would you like to re-enter a depth-limit?  (type 'no' to quit)");
-		String answer = new Scanner(System.in).next();
-		if (answer.toLowerCase().equals("no")) break;
-		else {System.out.println("What depth limit would you like?");
-				answer = new Scanner(System.in).next();
-				int answer2 = -1;
-				try{answer2 = Integer.parseInt(answer);}
-				catch(Exception nodepth){System.out.println("You typed: "+answer);
-				System.out.println("The depth limit must be a number."); break;}
-				if (answer2 < 0) break;}
-				}
-		}
-		
-		if (choice.equals("dfid")){
-		int false_limit = -1;
-		CarryBoolean p = new CarryBoolean();
-		while(true){
-			while(false_limit < depth_limit){
-			false_limit += 1;
-			int NEXT_DEPTH = search(p , false_limit, new EightPuzzle(start, goal,size), new VectorAsList(), hasLimit);
-			System.out.println("Goal found: "+p.getValue());
-			System.out.println("Increasing depth to: "+NEXT_DEPTH+"\n");}
-
-			System.out.println("Would you like to re-enter a depth-limit?  (type 'no' to quit)");
-			String answer = new Scanner(System.in).next();
-			if (answer.toLowerCase().equals("no")) break;
-			else {System.out.println("What depth limit would you like?");
-					answer = new Scanner(System.in).next();
-					int answer2 = -1;
-					try{answer2 = Integer.parseInt(answer);}
-					catch(Exception nodepth){System.out.println("You typed: "+answer);
-					System.out.println("The depth limit must be a number."); break;}
-					if (answer2 < 0) break;}
-					}
-			}
-			
-			
-		if (choice.equals("a")){
-		
-		CarryBoolean p = new CarryBoolean();
-			int NEXT_DEPTH = search(p , depth_limit, new EightPuzzle(start, goal,size), new Asearch(), hasLimit);
-			System.out.println("Goal found: "+p.getValue());
-			System.out.println("Last depth was: " + NEXT_DEPTH);
-					
-			}
-		
-		if (choice.equals("ida")){
-		hasLimit = true;
-		int false_limit = 0;
-		CarryBoolean p = new CarryBoolean();
-		while(true){
-			int NEXT_DEPTH = search(p , false_limit, new FifteenPuzzle(start, goal,size), new Asearch(), hasLimit);
-			System.out.println("Goal found: "+p.getValue());
-			if(!p.getValue()){
-			System.out.println("Increasing depth to: " + NEXT_DEPTH);
-			false_limit = NEXT_DEPTH;}
-			else break;
-			
-					}
-			}
-		
-		
-		
-		
-	}
-
-	public int search(CarryBoolean done, int limit, StateSpace ssp, SearchList open, boolean hasLimit) {
-
-		if(hasLimit)System.out.println("Starting search with limit "+ limit);
-
-		if(!(open instanceof Asearch))open.add(new State(ssp.getStart()));
-		if(open instanceof Asearch)open.add(new State(ssp.getStart(),ssp.getGoal()));
-		State current = new State("null");
-		int count = 0;
-
-		while (!done.getValue()) {
-		
-			if(!hasLimit) limit+=1;
-
-			if (open.size()==0) {
-				System.out.println("open list empty at "+count);
-				break;
-			}
-
-			current =  open.remove();
-			count++;
-			if (count % PRINT_HOW_OFTEN == 0) {
-				if(hasLimit)System.out.print("Search limit "+limit+" at ");
-				System.out.println("Node # "+
-						count+" Open list length:"+open.size()+" Current Node "+
-						current.getRep()+"  Depth: "+current.getDepth());
-			}
-			if (ssp.isGoal(current.getRep())) {
-				done.set(true);
-				System.out.println(count+": found goal at "+current.getRep()+" at depth "+current.getDepth());
-				current.printPath();
-				break;
-			}
-
-			if (current.getDepth() <= limit) {
-				Vector<String> kids = ssp.getKids(current.getRep());
-				
-				if(!(open instanceof Asearch)){
-				for (String v : kids) {
-					if (!current.getPath().contains(v)) 
-						open.add(new State(current,v));
-					}}
-				if(open instanceof Asearch){
-				for (String v : kids) {
-					if (!current.getPath().contains(v)) 
-						open.add(new State(current,v, ssp.getGoal()));
-					}}
-				
-				
-			}
-		}
-		if(hasLimit)return limit+6;
-		else return current.getDepth();
+        if (args.length < 1) {
+            System.out.println("you need to enter a vacuum cleaner world file name.");
+            System.exit(1);
+        }
+        
+        BufferedReader br = new BufferedReader(new FileReader(args[0]));
+        
+        //FileReader stream = new FileReader(args[0]);
+		Vector<Character> map = new Vector<Character>();
+        
+        String line;
+        boolean Y = true;
+        int y = -1;
+        int x = -1;
+        
+        while((line = br.readLine()) != null)
+        {
+            try{ if(!(Y)) x = (Integer.parseInt(line.replaceAll("\\s+","")) > 0)? Integer.parseInt(line.replaceAll("\\s+","")) : x;
+                 if(Y){ y = (Integer.parseInt(line.replaceAll("\\s+","")) > 0)? Integer.parseInt(line.replaceAll("\\s+","")): y; Y = false;}
+                    if(x > 0)break;
+                    continue;
+            }
+            catch (Exception notInt){}
+        }
+        
+        
+        while((line = br.readLine()) != null)
+        {
+            char[] mover = line.replaceAll("\\s+","").toCharArray();
+            for (int i = 0; i < mover.length; i++)
+                map.add(mover[i]);
+        }
+        
+        
+        
+		boolean done = false;
+        
+        
+      VCRoom room = new VCRoom(y, x, map);
+        room.printMap();
+        State start = room.initialize();
+        System.out.println(start.getPath());
+        
+        
+        SearchBase sb = new SearchBase();
+        if(debug)System.out.println("Start state path length: "+start.getPath().length());
+        //a 2 shows up before go is called.
+        sb.go(room,start);
+        
+       
+        
+        // 1. VCWorld; 2. RBFS; 3. States; 4. VCWorld::getKids();
+        
 	}
 
 
-	/* 
-		We don't need these since we're using if statements to choose
-		what searchlist search() uses. 
-	public int vectorSearch(CarryBoolean done, int limit, StateSpace ssp) {
-
-		return search(done,limit,ssp,new VectorAsList());
-	}
-
-
-	public int bestFirstSearch(CarryBoolean done, int limit, StateSpace ssp) {
-
-		return search(done,limit,ssp,new PQasList());
-	} */
+    public void go(VCRoom room, State start)
+    {
+        State solution = RBFS(room, start, start.getFvalue());
+        if(debug)System.out.println(solution.getMost() + "  " +solution);
+        
+        
+    }
+    
 
 
+
+    public State RBFS(VCRoom room, State current, double flimit)
+    { double f_limit = flimit;
+            if(debug)System.out.println("(DEBUG on)\nThe state calling RBFS is: "+ current+"\n");
+        Vector<State> kids = room.getKids(current);
+        if (kids.size() < 0){current.setMost(-1);if(debug)System.out.println("(DEBUG on)\nNo possible moves.\n"); return current;}
+        while(true){
+            int[] place_holder = {0,0};
+            State most = new State(place_holder, 0.0);
+            State best = findBest(kids); State second = secondBest(kids);
+                if(debug)System.out.println("(DEBUG on)\nBest path here is:\n" + best);
+                if(debug)System.out.println("and it's MOST is: " +best.getMost()+ "; it's fValue is: "+best.getFvalue()+"\n");
+            if(best.getDirt().size()==0){System.out.println("RESULT FOUND!!!!!!!!!!"); System.out.println(best); return best;}
+            if(current.getPath().length() == 0) f_limit = second.getMost();
+                if(debug)System.out.println("current F_LIMIT is: "+ f_limit+"\n");
+            if(best.getMost() > f_limit){current.setMost(best.getMost()); return best;}
+            else most = RBFS(room, best, f_limit);
+            if (most.getDirt().size()==0)return most;
+                if(debug)System.out.println("(DEBUG on)\nReturning... Setting 'most seen' for: " + best.getPath() +" to " +best.getMost()+"\n");
+
+        }
+    
+
+
+
+
+
+    }
+
+    public State findBest(Vector<State> list){
+        if(list.size() == 0) return (new State());
+        State w = list.elementAt(0); // default best is first element.
+        for (State x: list)
+        {
+            boolean bigger = false;
+            for (State y: list)
+                if (x.biggerThan(y))
+                    bigger = true;
+            if (!(bigger)) return x; // true best is smallest element.
+        }
+        return w;
+        
+    }
+    
+    
+    public State secondBest(Vector<State> list){
+        if(list.size() == 0)return (new State());
+        Vector<State> copy = new Vector<State>();
+        for (State x: list)copy.add(x);
+        
+        State best = findBest(copy);      // find best in list
+        int index = copy.indexOf(best);
+        copy.remove(index);               // remove it
+        
+        State second;
+        if(copy.size() > 0)
+        second = findBest(copy);         // find secondbest in list
+        else second = list.elementAt(0);
+        return second;
+    }
+    
+    
 }
