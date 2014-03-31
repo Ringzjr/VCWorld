@@ -4,7 +4,7 @@ import java.io.*;
 public class SearchBase {
 
 	private static int PRINT_HOW_OFTEN = 1;
-	public static boolean debug = false;
+	public static boolean debug = true;
 
 
 	public static void main(String[] args) throws IOException {
